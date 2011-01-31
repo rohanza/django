@@ -1,4 +1,4 @@
-VERSION = (1, 2, 4, 'final', 0)
+VERSION = (1, 2, 4, 'byteorbit', 20110126)
 
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])

@@ -59,7 +59,7 @@ class ChangeList(object):
         if ERROR_FLAG in self.params:
             del self.params[ERROR_FLAG]
 
-        self.order_field, self.order_type = self.get_ordering()
+        self.orderings, self.order_field, self.order_type = self.get_ordering()
         self.query = request.GET.get(SEARCH_VAR, '')
         self.query_set = self.get_query_set()
         self.get_results(request)
@@ -162,7 +162,7 @@ class ChangeList(object):
                 pass # Invalid ordering specified. Just use the default.
         if ORDER_TYPE_VAR in params and params[ORDER_TYPE_VAR] in ('asc', 'desc'):
             order_type = params[ORDER_TYPE_VAR]
-        return order_field, order_type
+        return ordering, order_field, order_type
 
     def get_query_set(self):
         qs = self.root_query_set
@@ -221,9 +221,13 @@ class ChangeList(object):
                             qs = qs.select_related()
                             break
 
-        # Set ordering.
-        if self.order_field:
-            qs = qs.order_by('%s%s' % ((self.order_type == 'desc' and '-' or ''), self.order_field))
+        # multi field ordering
+        if self.orderings:
+            qs = qs.order_by(*self.orderings)
+        else:
+            # Set ordering.
+            if self.order_field:
+                qs = qs.order_by('%s%s' % ((self.order_type == 'desc' and '-' or ''), self.order_field))
 
         # Apply keyword searches.
         def construct_search(field_name):
